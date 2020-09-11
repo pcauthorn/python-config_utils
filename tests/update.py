@@ -15,7 +15,7 @@ class TestUpdateDicts(unittest.TestCase):
         copy_o.update(copy_t)
         self.assertEqual(c, copy_o)
 
-    def test_recursive(self):
+    def test_recursive_negative_case(self):
         o = {1: 'a', 2: 'b'}
         t = {2: 'c', 4: 'd'}
         n1 = {5: 'e', 6: 'f', 'n': o}
@@ -24,7 +24,7 @@ class TestUpdateDicts(unittest.TestCase):
         n1.update(n2)
         self.assertNotEqual(c, n1)
 
-    def test_recursive_2(self):
+    def test_recursive(self):
         o = {1: 'a', 2: 'b'}
         t = {2: 'c', 4: 'd'}
         n1 = {5: 'e', 6: 'f', 'n': o}
@@ -34,6 +34,24 @@ class TestUpdateDicts(unittest.TestCase):
         n1.update(n2)
         o.update(t)
         self.assertEqual(c, n1)
+
+    def test_replace(self):
+        o = {1: 'should be gone', 2: 'this too'}
+        t = {2: 'stay', 4: 'stay'}
+        n1 = {4: 'gone', 6: 'f', 'n': o}
+        n2 = {5: 'f', 6: 'f', 'n': t}
+        c = update_dicts(n1, n2, replace=['n'])
+        self.assertEqual(set(c['n'].values()), {'stay'})
+        n1.update(n2)
+        self.assertEqual(c, n1)
+
+    def test_replace_nested(self):
+        n1 = {4: 'e', 6: 'f', 'n': {1: {2: {'a': 'should be gone'}}}}
+        n2 = {5: 'f', 6: 'f', 'n': {1: {2: {'c': 'stay'}}}}
+        c = update_dicts(n1, n2, replace=['n', 1, 2])
+        self.assertEqual(c['n'][1][2], {'c': 'stay'})
+        d = update_dicts(n1, n2)
+        self.assertNotEqual(d['n'][1][2], {'c': 'stay'})
 
 
 class TestUpdateConfig(unittest.TestCase):
@@ -62,6 +80,19 @@ class TestUpdateConfig(unittest.TestCase):
         self.assertEqual(result, updated)
         self.assertNotEqual(c, updated)
 
+    def test_replace(self):
+        c = {ConfigKeys.Directive: {ConfigDirectiveKeys.Update: 'a', ConfigDirectiveKeys.Replace: [4]},
+             1: 'a',
+             2: 'b',
+             4: {2: 'should be gone', 1: 'should be gone'}}
+        update = {1: 'replaced1', 3: 'c', 4: {'should be': 'all new'}}
+        resolver = {'a': update}
+        updater = UpdateConfig(resolver=resolver)
+        updated = updater.update_config(c)
+        result = deepcopy(c)
+        result.update(update)
+        self.assertEqual(result, updated)
+        self.assertNotEqual(c, updated)
 
 
 if __name__ == '__main__':

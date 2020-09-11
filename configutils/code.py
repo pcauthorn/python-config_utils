@@ -21,15 +21,27 @@ class ConfigUpdater:
         pass
 
 
+def _get_nested_replace(k, replace):
+    """
+    replace is looks like this:
+    ['k1', 'k2', 'k3', ['k4', 'k1']]
+    strings are keys the current dict and nested would be in a list.
+    note: any key that is a string wouldn't also be the first element in a list
+    This is because an string key the whole dict will get replaced
+    """
+    return [a[1] if len(a) == 1 else a[1:] for a in replace if isinstance(a, list) and a and a[0] == k]
+
+
 def update_dicts(base, the_update, replace=None):
     if not isinstance(base, dict) or not isinstance(the_update, dict):
         raise TypeError(f'Both items should be dictionaries: {type(base)}, {type(the_update)}')
+    replace = replace or []
     base = deepcopy(base)
     for k, v in the_update.items():
-        if isinstance(v, Mapping):
+        if isinstance(v, Mapping) and k not in replace:
             i = base.get(k, {})
             if isinstance(i, Mapping):
-                base[k] = update_dicts(i, v)
+                base[k] = update_dicts(i, v, replace=_get_nested_replace(k, replace))
             else:
                 base[k] = v
         else:
@@ -48,6 +60,7 @@ class UpdateConfig:
         result = deepcopy(c)
         directive = c[ConfigKeys.Directive]
         updates = directive.get(ConfigDirectiveKeys.Update)
+        replace = directive.get(ConfigDirectiveKeys.Replace)
         if not isinstance(updates, list):
             updates = [updates]
         for update in updates:
@@ -55,7 +68,7 @@ class UpdateConfig:
             if not i:
                 logger.warning(f'Could not find update: {update} with resolver {self.resolver}, skipping')
                 continue
-            result = update_dicts(result, i)
+            result = update_dicts(result, i, replace=replace)
         return result
 
 
