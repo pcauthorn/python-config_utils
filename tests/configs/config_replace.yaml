@@ -1,0 +1,9 @@
+section:
+  config_part1:
+    data1: hello
+  config_part2:
+    data1: confg1
+
+__ConfigUtil_Directive:
+  Update: configs/b.yaml
+  Replace: [[section, config_part1]]

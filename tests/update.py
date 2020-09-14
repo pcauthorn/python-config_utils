@@ -113,6 +113,15 @@ class TestConfigUpdater(unittest.TestCase):
         config['section'].update(a['section'])
         self.assertEqual(config, result)
 
+    def test_file_with_replace(self):
+        resolver = FileResolver()
+        updater = ConfigUpdater(resolver=resolver)
+        with open('configs/config_replace.yaml', 'r') as f:
+            config = load(f, Loader=Loader)
+        result = updater.update_config(config)
+        self.assertNotEqual(config, result)
+        self.assertDictEqual(result['section']['config_part1'], config['section']['config_part1'])
+
 
 if __name__ == '__main__':
     unittest.main()

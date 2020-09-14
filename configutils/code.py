@@ -27,7 +27,7 @@ def _get_nested_replace(k, replace):
     note: any key that is a.yaml string wouldn't also be the first element in a.yaml list
     This is because the string keys whole dict will get replaced
     """
-    return [a[1] if len(a) == 1 else a[1:] for a in replace if isinstance(a, list) and a and a[0] == k]
+    return [a[1] if len(a) == 2 else a[1:] for a in replace if isinstance(a, list) and a and a[0] == k]
 
 
 def update_dicts(base, the_update, replace=None):
