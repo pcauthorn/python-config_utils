@@ -78,7 +78,7 @@ class FileResolver:
 
 class ConfigUpdater:
     def __init__(self, resolver=None):
-        self.resolver = resolver  # write a.yaml file resolver, default to this if resolver is None
+        self.resolver = resolver or FileResolver()
 
     def update_config(self, c):
         if ConfigKeys.Directive not in c:
