@@ -1,0 +1,6 @@
+{
+  "json_config": {
+    "b1": "bv1",
+    "a2": "override"
+  }
+}

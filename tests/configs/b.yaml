@@ -1,0 +1,6 @@
+section:
+   config_part1:
+       data1: b1
+       data3: b3
+   config_part2:
+       cp2data: b

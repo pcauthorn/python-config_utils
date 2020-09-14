@@ -1,0 +1,6 @@
+section:
+   config_part2:
+       data1: confg1
+
+__ConfigUtil_Directive:
+  Update: configs/a.yaml

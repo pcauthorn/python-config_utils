@@ -1,7 +1,8 @@
 import unittest
 from copy import deepcopy
+from yaml import Loader, load
 
-from configutils.code import update_dicts, UpdateConfig, ConfigKeys, ConfigDirectiveKeys
+from configutils.code import update_dicts, ConfigUpdater, ConfigKeys, ConfigDirectiveKeys, FileResolver
 
 
 class TestUpdateDicts(unittest.TestCase):
@@ -54,13 +55,13 @@ class TestUpdateDicts(unittest.TestCase):
         self.assertNotEqual(d['n'][1][2], {'c': 'stay'})
 
 
-class TestUpdateConfig(unittest.TestCase):
+class TestConfigUpdater(unittest.TestCase):
 
     def test_simple(self):
         c = {ConfigKeys.Directive: {ConfigDirectiveKeys.Update: 'a'}, 1: 'a', 2: 'b'}
         update = {1: 'replaced1', 3: 'c'}
         resolver = {'a': update}
-        updater = UpdateConfig(resolver=resolver)
+        updater = ConfigUpdater(resolver=resolver)
         updated = updater.update_config(c)
         result = deepcopy(c)
         result.update(update)
@@ -72,7 +73,7 @@ class TestUpdateConfig(unittest.TestCase):
         update = {1: 'replaced1', 3: 'c'}
         update2 = {1: 'replaced2', 4: 'c'}
         resolver = {'a': update, 'b': update2}
-        updater = UpdateConfig(resolver=resolver)
+        updater = ConfigUpdater(resolver=resolver)
         updated = updater.update_config(c)
         result = deepcopy(c)
         result.update(update)
@@ -87,12 +88,24 @@ class TestUpdateConfig(unittest.TestCase):
              4: {2: 'should be gone', 1: 'should be gone'}}
         update = {1: 'replaced1', 3: 'c', 4: {'should be': 'all new'}}
         resolver = {'a': update}
-        updater = UpdateConfig(resolver=resolver)
+        updater = ConfigUpdater(resolver=resolver)
         updated = updater.update_config(c)
         result = deepcopy(c)
         result.update(update)
         self.assertEqual(result, updated)
         self.assertNotEqual(c, updated)
+
+    def test_with_resolver(self):
+        resolver = FileResolver()
+        updater = ConfigUpdater(resolver=resolver)
+        with open('configs/config.yaml', 'r') as f:
+            config = load(f, Loader=Loader)
+        result = updater.update_config(config)
+        self.assertNotEqual(config, result)
+        with open('configs/a.yaml', 'r') as f:
+            a = load(f, Loader=Loader)
+        config['section'].update(a['section'])
+        self.assertEqual(config, result)
 
 
 if __name__ == '__main__':

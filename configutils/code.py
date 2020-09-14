@@ -1,10 +1,17 @@
+import json
 import logging
+import re
 from collections.abc import Mapping
 from copy import deepcopy
 
-logger = logging.getLogger(__name__)
+import yaml
 
-UPDATES = {}
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigKeys:
@@ -16,18 +23,13 @@ class ConfigDirectiveKeys:
     Replace = 'Replace'
 
 
-class ConfigUpdater:
-    def __init__(self):
-        pass
-
-
 def _get_nested_replace(k, replace):
     """
     replace is looks like this:
     ['k1', 'k2', 'k3', ['k4', 'k1']]
-    strings are keys the current dict and nested would be in a list.
-    note: any key that is a string wouldn't also be the first element in a list
-    This is because an string key the whole dict will get replaced
+    strings are keys the current dict and nested would be in a.yaml list.
+    note: any key that is a.yaml string wouldn't also be the first element in a.yaml list
+    This is because the string keys whole dict will get replaced
     """
     return [a[1] if len(a) == 1 else a[1:] for a in replace if isinstance(a, list) and a and a[0] == k]
 
@@ -49,9 +51,34 @@ def update_dicts(base, the_update, replace=None):
     return base
 
 
-class UpdateConfig:
+class FileResolver:
+    def __init__(self, data_type=None):
+        self.data_type = data_type
+
+    def get(self, file_name):
+        if not self.data_type:
+            data_type = re.split(r'[/\\]', file_name)[-1]
+            data_type = data_type.split('.')
+            if len(data_type) == 2:
+                data_type = data_type[1]
+            else:
+                logger.warning(f'Could not determine datatype with file {file_name}, using json')
+                data_type = 'json'
+        else:
+            data_type = self.data_type
+        with open(file_name, 'r') as f:
+            if data_type == 'yaml':
+                result = yaml.load(f, Loader=Loader)
+            elif data_type == 'json':
+                result = json.load(f)
+            else:
+                raise TypeError(f'No support for file type {data_type}')
+        return result
+
+
+class ConfigUpdater:
     def __init__(self, resolver=None):
-        self.resolver = resolver  # write a file resolver, default to this if resolver is None
+        self.resolver = resolver  # write a.yaml file resolver, default to this if resolver is None
 
     def update_config(self, c):
         if ConfigKeys.Directive not in c:
