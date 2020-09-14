@@ -5,11 +5,7 @@ from collections.abc import Mapping
 from copy import deepcopy
 
 import yaml
-
-try:
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader
+from yaml import Loader
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +93,3 @@ class ConfigUpdater:
                 continue
             result = update_dicts(result, i, replace=replace)
         return result
-
-
-if __name__ == '__main__':
-    print(update_dicts({'k1': 1}, {'k1': {'k2': {'k3': 3}}}))
