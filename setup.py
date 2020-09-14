@@ -15,7 +15,7 @@ setup(
     description="Tools to dynamically build config files",
     license="BSD",
     url="https://github.com/pcauthorn/python-configutils",
-    packages=['code', 'tests'],
+    packages=['configutils', 'tests'],
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
