@@ -23,8 +23,8 @@ def _get_nested_replace(k, replace):
     """
     replace is looks like this:
     ['k1', 'k2', 'k3', ['k4', 'k1']]
-    strings are keys the current dict and nested would be in a list.
-    note: any key that is a string wouldn't also be the first element in a list
+    strings are keys in the current dict, list would be for keys in a nested dict.
+    Note: any key that is a string wouldn't also be the first element in a list
     This is because the string keys whole dict will get replaced
     """
     return [a[1] if len(a) == 2 else a[1:] for a in replace if isinstance(a, list) and a and a[0] == k]
