@@ -80,16 +80,17 @@ class ConfigUpdater:
         if ConfigKeys.Directive not in c:
             logger.warning(f'No Directive Key ({ConfigKeys.Directive}), not doing anything')
             return deepcopy(c)
-        result = deepcopy(c)
         directive = c[ConfigKeys.Directive]
         updates = directive.get(ConfigDirectiveKeys.Update)
         replace = directive.get(ConfigDirectiveKeys.Replace)
         if not isinstance(updates, list):
             updates = [updates]
+        result = {}
         for update in updates:
             i = self.resolver.get(update)
             if not i:
                 logger.warning(f'Could not find update: {update} with resolver {self.resolver}, skipping')
                 continue
             result = update_dicts(result, i, replace=replace)
+        result = update_dicts(result, c, replace=replace)
         return result

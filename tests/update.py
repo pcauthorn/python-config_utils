@@ -1,5 +1,6 @@
 import unittest
 from copy import deepcopy
+
 from yaml import Loader, load
 
 from configutils.code import update_dicts, ConfigUpdater, ConfigKeys, ConfigDirectiveKeys, FileResolver
@@ -59,41 +60,46 @@ class TestConfigUpdater(unittest.TestCase):
 
     def test_simple(self):
         c = {ConfigKeys.Directive: {ConfigDirectiveKeys.Update: 'a'}, 1: 'a', 2: 'b'}
-        update = {1: 'replaced1', 3: 'c'}
-        resolver = {'a': update}
+        updated = {1: '1u', 3: 'c'}
+        resolver = {'a': updated}
         updater = ConfigUpdater(resolver=resolver)
-        updated = updater.update_config(c)
-        result = deepcopy(c)
-        result.update(update)
-        self.assertEqual(result, updated)
-        self.assertNotEqual(c, updated)
+        manual_update = updater.update_config(c)
+        updated.update(c)
+        self.assertEqual(manual_update, updated)
+
+    def test_no_side_effects(self):
+        c = {ConfigKeys.Directive: {ConfigDirectiveKeys.Update: 'a'}, 1: 'a', 2: 'b'}
+        orig_config = deepcopy(c)
+        updated = {1: '1u', 3: 'c'}
+        resolver = {'a': updated}
+        updater = ConfigUpdater(resolver=resolver)
+        updated_config = updater.update_config(c)
+        self.assertEqual(orig_config, c)
+        self.assertNotEqual(orig_config, updated_config)
 
     def test_multiple(self):
         c = {ConfigKeys.Directive: {ConfigDirectiveKeys.Update: ['a', 'b']}, 1: 'a', 2: 'b'}
         update = {1: 'replaced1', 3: 'c'}
-        update2 = {1: 'replaced2', 4: 'c'}
+        update2 = {1: 'replaced2', 3: 'c2', 4: 'd'}
         resolver = {'a': update, 'b': update2}
         updater = ConfigUpdater(resolver=resolver)
         updated = updater.update_config(c)
-        result = deepcopy(c)
-        result.update(update)
-        result.update(update2)
-        self.assertEqual(result, updated)
         self.assertNotEqual(c, updated)
+        self.assertEqual(updated[1], 'a')
+        self.assertEqual(updated[4], 'd')
+        self.assertEqual(updated[3], 'c2')
 
     def test_replace(self):
         c = {ConfigKeys.Directive: {ConfigDirectiveKeys.Update: 'a', ConfigDirectiveKeys.Replace: [4]},
              1: 'a',
              2: 'b',
-             4: {2: 'should be gone', 1: 'should be gone'}}
+             4: {2: 'just this'}}
         update = {1: 'replaced1', 3: 'c', 4: {'should be': 'all new'}}
         resolver = {'a': update}
         updater = ConfigUpdater(resolver=resolver)
         updated = updater.update_config(c)
-        result = deepcopy(c)
-        result.update(update)
-        self.assertEqual(result, updated)
         self.assertNotEqual(c, updated)
+        self.assertDictEqual(updated[4], {2: 'just this'})
 
     def test_with_resolver(self):
         resolver = FileResolver()
