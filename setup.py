@@ -15,6 +15,7 @@ setup(
     description="Tools to dynamically build config files",
     license="BSD",
     url="https://github.com/pcauthorn/python-configutils",
+    install_requires=['PyYAML'],
     packages=['configutils', 'tests'],
     long_description=read('README.md'),
     classifiers=[
