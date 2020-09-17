@@ -1,6 +1,6 @@
 # configutils
 
-Allows to build configs from other configs
+Allows for composable configs
 
 ```yaml
 # yaml at somelocation/config.yaml
@@ -28,6 +28,9 @@ new_config = updater.update_config(config)
 
 Will work with `json` or `yaml` files.
 
+
+
+####Replace
 Nested dictionaries are also updated unless the `Replace` directive is included.
 
 ```yaml
@@ -52,13 +55,37 @@ __ConfigUtil_Directive:
   Replace: [['nested']] # list of list of key parameters 
 ```
 
-`nested` would be a `dict` just with the key `letter` not the expected of `letter` and `number`
+In the updated config `nested` would be a `dict` just with the key `letter` not the default behavior of `letter` and `number`
 
+
+####Other formats
 To use other formats or to store somewhere besides the filesystem pass in 
 a custom `resolver` which takes the string from `Update` and returns a `dict`
 of the config
 
+DynamoDB might look like this:
+```
+class DynamoResolver:
+    dif __init__(self...):
+        # initialize connection/get table
+    def get(name):
+        response = table.get_item(
+            Key={
+                'config_name': name
+            }
+        )
+        return response['Item']
 
+```
+Could be used like this:
+```
+dynamo_resolver = DynamoResolver(...)
+config =  dynamo_resolver.get(<config name>)
+updater = ConfigUpdater(resolver=dynamo_resolver)
+new_config = updater.update_config(config)
+
+
+```
 
 **NOTE:**
 
