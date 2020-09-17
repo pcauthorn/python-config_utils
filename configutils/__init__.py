@@ -1,4 +1,4 @@
-from .code import ConfigKeys, ConfigDirectiveKeys, ConfigUpdater, FileResolver
+from .src import ConfigKeys, ConfigDirectiveKeys, ConfigUpdater, FileResolver
 
 __all__ = [
     'ConfigKeys',

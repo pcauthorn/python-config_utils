@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from yaml import Loader, load
 
-from configutils.code import update_dicts, ConfigUpdater, ConfigKeys, ConfigDirectiveKeys, FileResolver
+from configutils.src import update_dicts, ConfigUpdater, ConfigKeys, ConfigDirectiveKeys, FileResolver
 
 
 class TestUpdateDicts(unittest.TestCase):
