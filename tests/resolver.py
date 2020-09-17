@@ -1,6 +1,6 @@
 import unittest
 
-from configutils.code import FileResolver
+from configutils.src import FileResolver
 
 
 class TestFileResolver(unittest.TestCase):
