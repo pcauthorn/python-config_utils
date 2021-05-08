@@ -3,6 +3,8 @@
 Allows for composable configs
 
 Example, with two configs
+
+# Merge
 ```yaml
 # base.yaml
 parser: xyz
@@ -34,7 +36,7 @@ new_config = updater.update_config(config)
 
 Will work with `json` or `yaml` files.
 
-####Replace
+# Replace
 Nested dictionaries are also merged unless the `Replace` directive is included.
 
 ```yaml
