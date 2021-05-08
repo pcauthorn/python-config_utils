@@ -3,7 +3,7 @@
 Allows for composable configs
 
 ```yaml
-# yaml at somelocation/config.yaml
+# base.yaml
 parser: xyz
 timeout: 10
 email: a@example.com
@@ -12,18 +12,25 @@ email: a@example.com
 ```
 
 ```yaml
+# A different config at abc.yaml
+
 parser: abc
 __ConfigUtil_Directive:
-  Update: [somelocation/config.yaml] # could have multiple
+  Update: [base.yaml] 
 ```
 
-Would create a config with default values from first file with the ```parser``` set to ```abc```
+Would create a config with default values from first file with the ```parser``` overridden and set to ```abc```
 
 Code would look like:
 ```
-config = yaml.load('file path'...)
+config = yaml.load('abc.yml')
 updater = ConfigUpdater()
 new_config = updater.update_config(config)
+print(new_config)
+parser: abc
+timeout: 10
+email: a@example.com
+
 ```
 
 Will work with `json` or `yaml` files.
@@ -31,10 +38,10 @@ Will work with `json` or `yaml` files.
 
 
 ####Replace
-Nested dictionaries are also updated unless the `Replace` directive is included.
+Nested dictionaries are also merged unless the `Replace` directive is included.
 
 ```yaml
-# yaml at somelocation/config.yaml
+# yaml at base.yaml
 parser: xyz
 timeout: 10
 email: a@example.com
@@ -51,41 +58,11 @@ nested:
   letter: k
 
 __ConfigUtil_Directive:
-  Update: [somelocation/config.yaml]
+  Update: [base.yaml]
   Replace: [['nested']] # list of list of key parameters 
 ```
 
 In the updated config `nested` would be a `dict` just with the key `letter` not the default behavior of `letter` and `number`
-
-
-####Other formats
-To use other formats or to store somewhere besides the filesystem pass in 
-a custom `resolver` which takes the string from `Update` and returns a `dict`
-of the config
-
-DynamoDB might look like this:
-```
-class DynamoResolver:
-    dif __init__(self...):
-        # initialize connection/get table
-    def get(name):
-        response = table.get_item(
-            Key={
-                'config_name': name
-            }
-        )
-        return response['Item']
-
-```
-Could be used like this:
-```
-dynamo_resolver = DynamoResolver(...)
-config =  dynamo_resolver.get(<config name>)
-updater = ConfigUpdater(resolver=dynamo_resolver)
-new_config = updater.update_config(config)
-
-
-```
 
 **NOTE:**
 
