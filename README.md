@@ -2,6 +2,7 @@
 
 Allows for composable configs
 
+Example, with two configs
 ```yaml
 # base.yaml
 parser: xyz
@@ -19,23 +20,19 @@ __ConfigUtil_Directive:
   Update: [base.yaml] 
 ```
 
-Would create a config with default values from first file with the ```parser``` overridden and set to ```abc```
-
-Code would look like:
+To create a config with default values from first file with the ```parser``` overridden and set to ```abc``` code would look like:
 ```
-config = yaml.load('abc.yml')
 updater = ConfigUpdater()
+config = yaml.load('abc.yml')
 new_config = updater.update_config(config)
-print(new_config)
-parser: abc
-timeout: 10
-email: a@example.com
+# new_config yaml:
+# parser: abc
+# timeout: 10
+# email: a@example.com
 
 ```
 
 Will work with `json` or `yaml` files.
-
-
 
 ####Replace
 Nested dictionaries are also merged unless the `Replace` directive is included.
